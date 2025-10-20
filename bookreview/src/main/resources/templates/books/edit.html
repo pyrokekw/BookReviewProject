@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Редактировать книгу - BookReview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/books}">
+            <i class="bi bi-book-half me-2"></i>BookReview
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{'/books/' + ${bookId}}">
+                <i class="bi bi-arrow-left me-1"></i>Назад к книге
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Редактировать книгу</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{'/books/' + ${bookId} + '/edit'}" th:object="${bookCreateDto}" method="post">
+
+                        <!-- Общие ошибки -->
+                        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                            </ul>
+                        </div>
+
+                        <!-- Название -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Название книги</label>
+                            <input type="text" th:field="*{title}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                   required
+                                   placeholder="Введите название книги">
+                            <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback">
+                                <span th:errors="*{title}"></span>
+                            </div>
+                        </div>
+
+                        <!-- Автор -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Автор</label>
+                            <input type="text" th:field="*{author}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('author')} ? 'is-invalid' : ''"
+                                   required
+                                   placeholder="Введите автора">
+                            <div th:if="${#fields.hasErrors('author')}" class="invalid-feedback">
+                                <span th:errors="*{author}"></span>
+                            </div>
+                        </div>
+
+                        <!-- Описание -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Описание</label>
+                            <textarea th:field="*{description}"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Введите описание книги"></textarea>
+                        </div>
+
+                        <!-- Ссылка на обложку -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Ссылка на обложку</label>
+                            <input type="url" th:field="*{coverUrl}"
+                                   class="form-control"
+                                   placeholder="https://example.com/cover.jpg">
+                        </div>
+
+                        <!-- Ссылка на файл -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Ссылка на файл книги</label>
+                            <input type="url" th:field="*{fileUrl}"
+                                   class="form-control"
+                                   placeholder="https://example.com/book.pdf">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg action-btn">
+                                <i class="bi bi-check-circle me-2"></i>Сохранить изменения
+                            </button>
+                            <a th:href="@{'/books/' + ${bookId}}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

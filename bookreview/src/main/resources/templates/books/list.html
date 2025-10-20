@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Книги - BookReview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/books}">
+            <i class="bi bi-book-half me-2"></i>BookReview
+        </a>
+        <div class="navbar-nav ms-auto">
+            <!-- Навигация для всех -->
+            <a class="nav-link" th:href="@{/books}">
+                <i class="bi bi-list-ul me-1"></i>Все книги
+            </a>
+
+            <!-- Управление аккаунтом -->
+            <div class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span sec:authentication="principal.username"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li sec:authorize="hasRole('ROLE_ADMIN')">
+                            <span class="dropdown-item-text text-muted">
+                                <small><i class="bi bi-shield-check me-1"></i>Администратор</small>
+                            </span>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" class="dropdown-item">
+                            <button type="submit" class="btn btn-link p-0 text-decoration-none">
+                                <i class="bi bi-box-arrow-right me-1"></i>Выйти
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Для неавторизованных -->
+            <div class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" th:href="@{/login}">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Войти
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-book me-2"></i>Каталог книг</h2>
+
+        <!-- Кнопка добавления книги для админа -->
+        <div sec:authorize="hasRole('ROLE_ADMIN')">
+            <a th:href="@{/books/add}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Добавить книгу
+            </a>
+        </div>
+    </div>
+
+    <!-- Сообщение об успешном добавлении книги -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ПАНЕЛЬ ПОИСКА И ФИЛЬТРАЦИИ -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/books}" method="get" class="row g-3">
+                <!-- Поиск по названию и автору -->
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Поиск книг</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search" name="search"
+                               th:value="${currentSearch}"
+                               placeholder="Введите название книги или автора...">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Фильтр по автору -->
+                <div class="col-md-4">
+                    <label for="author" class="form-label">Фильтр по автору</label>
+                    <select class="form-select" id="author" name="author" onchange="this.form.submit()">
+                        <option value="all">Все авторы</option>
+                        <option th:each="author : ${authors}"
+                                th:value="${author}"
+                                th:text="${author}"
+                                th:selected="${currentAuthor == author}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Кнопка сброса -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <a th:href="@{/books}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Сброс
+                    </a>
+                </div>
+            </form>
+
+            <!-- Информация о текущем поиске/фильтре -->
+            <div th:if="${currentSearch != null or (currentAuthor != null and currentAuthor != 'all' and !currentAuthor.isEmpty())}" class="mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <span th:if="${currentSearch != null}">
+            Поиск: "<span th:text="${currentSearch}"></span>"
+        </span>
+                    <span th:if="${currentSearch != null and currentAuthor != null and currentAuthor != 'all' and !currentAuthor.isEmpty()}"> | </span>
+                    <span th:if="${currentAuthor != null and currentAuthor != 'all' and !currentAuthor.isEmpty()}">
+            Автор: "<span th:text="${currentAuthor}"></span>"
+        </span>
+                    <span th:if="${books != null}">
+            · Найдено книг: <span th:text="${totalItems}"></span>
+        </span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- СПИСОК КНИГ -->
+    <div class="row">
+        <div th:each="book : ${books}" class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <!-- Упрощенная версия - onerror больше не нужен -->
+                <img th:src="${book.coverUrl}" th:alt="${book.title}"
+                     class="card-img-top" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${book.title}"></h5>
+                    <h6 class="card-subtitle mb-2 text-muted" th:text="${book.author}"></h6>
+                    <p class="card-text" th:text="${book.description != null ? #strings.abbreviate(book.description, 100) : 'Описание отсутствует'}"></p>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a th:href="@{'/books/' + ${book.id}}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i>Просмотр
+                        </a>
+
+                        <!-- Кнопка скрытия для админа -->
+                        <div sec:authorize="hasRole('ROLE_ADMIN')">
+                            <form th:action="@{'/books/' + ${book.id} + '/deactivate'}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-eye-slash me-1"></i>Скрыть
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Пагинация -->
+    <div th:if="${totalPages != null and totalPages > 1}" class="mt-5">
+        <nav aria-label="Навигация по страницам">
+            <ul class="pagination justify-content-center">
+                <!-- Кнопка "Назад" -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="@{/books(page=${currentPage - 1}, search=${currentSearch}, author=${currentAuthor != 'all' ? currentAuthor : null})}"
+                       aria-label="Предыдущая">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <!-- Номера страниц -->
+                <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
+                    class="page-item"
+                    th:classappend="${currentPage == page} ? 'active' : ''">
+                    <a class="page-link"
+                       th:href="@{/books(page=${page}, search=${currentSearch}, author=${currentAuthor != 'all' ? currentAuthor : null})}"
+                       th:text="${page + 1}"></a>
+                </li>
+
+                <!-- Кнопка "Вперед" -->
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="@{/books(page=${currentPage + 1}, search=${currentSearch}, author=${currentAuthor != 'all' ? currentAuthor : null})}"
+                       aria-label="Следующая">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Информация о странице -->
+        <div class="text-center text-muted mt-2">
+            <small>
+                Показано <span th:text="${books != null ? books.numberOfElements : 0}"></span> из
+                <span th:text="${totalItems}"></span> книг
+                <span th:if="${currentSearch != null}"> по запросу "</span><span th:text="${currentSearch}"></span><span th:if="${currentSearch != null}">"</span>
+                <span th:if="${currentAuthor != null and currentAuthor != 'all' and !currentAuthor.isEmpty()}"> автора "</span><span th:text="${currentAuthor}"></span><span th:if="${currentAuthor != null and currentAuthor != 'all' and !currentAuthor.isEmpty()}">"</span>
+            </small>
+        </div>
+    </div>
+
+    <div th:if="${books == null or books.empty}" class="text-center py-5">
+        <i class="bi bi-book display-1 text-muted"></i>
+        <h4 class="text-muted mt-3" th:text="${currentSearch != null or currentAuthor != null} ? 'Книги не найдены' : 'Книг пока нет'"></h4>
+        <p class="text-muted" th:if="${currentSearch != null or currentAuthor != null}">
+            Попробуйте изменить параметры поиска или
+            <a th:href="@{/books}" class="text-decoration-none">показать все книги</a>
+        </p>
+        <p class="text-muted" sec:authorize="hasRole('ROLE_ADMIN')" th:unless="${currentSearch != null or currentAuthor != null}">
+            <a th:href="@{/books/add}" class="btn btn-primary mt-2">Добавить первую книгу</a>
+        </p>
+        <p class="text-muted" sec:authorize="!hasRole('ROLE_ADMIN')" th:unless="${currentSearch != null or currentAuthor != null}">
+            Скоро здесь появятся книги
+        </p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

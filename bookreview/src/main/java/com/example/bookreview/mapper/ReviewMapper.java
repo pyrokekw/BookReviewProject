@@ -14,8 +14,8 @@ public interface ReviewMapper {
     @Mapping(target = "likesCount", expression = "java(review.getLikes() != null ? review.getLikes().size() : 0)")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")
-    @Mapping(target = "liked", ignore = true) // Устанавливается в сервисе
-    @Mapping(target = "comments", ignore = true) // Пока не используем комментарии из маппера
+    @Mapping(target = "liked", ignore = true)
+    @Mapping(target = "comments", ignore = true)
     ReviewDto toDto(Review review);
 
     List<ReviewDto> toDtoList(List<Review> reviews);

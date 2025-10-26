@@ -10,11 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    List<Comment> findByReview(Review review);
-    List<Comment> findByReviewIdIn(List<Long> reviewIds);
-
-    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.user WHERE c.review = :review ORDER BY c.createdAt ASC")
-    List<Comment> findByReviewWithUser(@Param("review") Review review);
 
     @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.user WHERE c.id = :commentId")
     Optional<Comment> findByIdWithUser(@Param("commentId") Long commentId);

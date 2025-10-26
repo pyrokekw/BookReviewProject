@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Обработка кастомных бизнес-исключений
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ModelAndView handleBusinessException(BusinessException ex, HttpServletRequest request) {
@@ -31,7 +30,6 @@ public class GlobalExceptionHandler {
         return mav;
     }
 
-    // Обработка ошибок валидации
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleValidationExceptions(MethodArgumentNotValidException ex, Model model) {
@@ -42,16 +40,13 @@ public class GlobalExceptionHandler {
 
         log.error("Validation error: {}", errorMessage);
 
-        // Возвращаемся на ту же форму с ошибками
         String viewName = determineViewName(ex);
         model.addAttribute("org.springframework.validation.BindingResult." +
                 result.getObjectName(), result);
 
-        // Восстанавливаем объект DTO
         try {
             model.addAttribute(result.getObjectName(), ex.getBindingResult().getTarget());
         } catch (Exception e) {
-            // Игнорируем если не можем восстановить объект
         }
 
         return viewName;
@@ -93,7 +88,6 @@ public class GlobalExceptionHandler {
         return mav;
     }
 
-    // Вспомогательный метод для определения имени view из исключения
     private String determineViewName(MethodArgumentNotValidException ex) {
         String methodName = ex.getParameter().getMethod().getName();
 

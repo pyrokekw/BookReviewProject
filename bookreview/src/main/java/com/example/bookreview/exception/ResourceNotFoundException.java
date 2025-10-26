@@ -9,7 +9,6 @@ public class ResourceNotFoundException extends RuntimeException {
         super(resource + " с ID " + id + " не найден");
     }
 
-    // ДОБАВЬ ЭТОТ КОНСТРУКТОР для строковых идентификаторов
     public ResourceNotFoundException(String resource, String identifier) {
         super(resource + " '" + identifier + "' не найден");
     }

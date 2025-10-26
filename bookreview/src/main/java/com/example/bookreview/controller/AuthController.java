@@ -76,7 +76,6 @@ public class AuthController {
     }
 
     private boolean isPasswordValid(String password) {
-        // Проверяем что пароль содержит минимум одну букву и одну цифру
         return password.matches(".*[a-zA-Z].*") && password.matches(".*\\d.*");
     }
 }

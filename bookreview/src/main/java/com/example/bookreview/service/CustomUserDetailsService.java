@@ -24,16 +24,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // Преобразуем нашу сущность User в UserDetails, который понимает Spring Security
+
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                getAuthorities(user) // Самое важное: передаем роли!
+                getAuthorities(user)
         );
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
-        // Преобразуем строку с ролью (например, "ROLE_USER") в объект GrantedAuthority
         return Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
     }
 }

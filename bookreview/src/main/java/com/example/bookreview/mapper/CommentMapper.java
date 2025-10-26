@@ -23,7 +23,7 @@ public interface CommentMapper {
         if (comments == null) {
             return new ArrayList<>();
         }
-        // Фильтруем null комментарии перед маппингом
+
         return comments.stream()
                 .filter(comment -> comment != null)
                 .map(this::toDto)

@@ -44,9 +44,8 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("Книга", bookId));
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", username)); // Теперь работает
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", username));
 
-        // Проверяем, не оставлял ли пользователь уже рецензию на эту книгу
         if (reviewRepository.findByBookAndUser(book, user).isPresent()) {
             throw new BusinessException("Вы уже оставляли рецензию на эту книгу");
         }
@@ -68,15 +67,6 @@ public class ReviewService {
 
         List<Review> reviews = reviewRepository.findByBookWithUserAndLikes(book);
         List<Review> reviewsWithComments = reviewRepository.findByBookWithComments(book);
-
-        // Отладочная информация (можно убрать в продакшене)
-        System.out.println("=== DEBUG COMMENTS ===");
-        for (Review review : reviewsWithComments) {
-            if (review.getComments() != null) {
-                System.out.println("Review ID: " + review.getId() +
-                        ", Comments count: " + review.getComments().size());
-            }
-        }
 
         Map<Long, List<CommentDto>> commentsByReviewId = extractCommentsMap(reviewsWithComments);
         List<ReviewDto> reviewDtos = reviewMapper.toDtoList(reviews);
@@ -146,7 +136,4 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    public Long getBookIdByReviewId(Long reviewId) {
-        return reviewRepository.findBookIdByReviewId(reviewId);
-    }
 }

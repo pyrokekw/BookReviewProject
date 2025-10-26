@@ -26,7 +26,6 @@ public class BookService {
     private static final String DEFAULT_COVER_URL = "https://i.pinimg.com/736x/69/e8/c8/69e8c85300a6d61b2b188930b4f2881b.jpg";
     private static final int BOOKS_PER_PAGE = 9;
 
-    // Новые методы с пагинацией
     public Page<BookDto> getAllBooks(Pageable pageable) {
         Page<Book> bookPage = bookRepository.findByIsActiveTrue(pageable);
         List<BookDto> bookDtos = bookPage.getContent().stream()
@@ -60,32 +59,6 @@ public class BookService {
         return new PageImpl<>(bookDtos, pageable, bookPage.getTotalElements());
     }
 
-    // Старые методы без пагинации (для обратной совместимости)
-    public List<BookDto> getAllBooks() {
-        List<BookDto> books = bookMapper.toDtoList(bookRepository.findByIsActiveTrue());
-        books.forEach(this::setDefaultCoverIfNeeded);
-        return books;
-    }
-
-    public List<BookDto> searchBooks(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            return getAllBooks();
-        }
-        List<BookDto> books = bookMapper.toDtoList(bookRepository.findByTitleOrAuthorContainingIgnoreCase(query.trim()));
-        books.forEach(this::setDefaultCoverIfNeeded);
-        return books;
-    }
-
-    public List<BookDto> filterByAuthor(String author) {
-        if (author == null || author.trim().isEmpty() || "all".equals(author)) {
-            return getAllBooks();
-        }
-        List<BookDto> books = bookMapper.toDtoList(bookRepository.findByAuthorContainingIgnoreCase(author.trim()));
-        books.forEach(this::setDefaultCoverIfNeeded);
-        return books;
-    }
-
-    // Остальные методы без изменений
     public BookDto getBookForEdit(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Книга", id));

@@ -2,16 +2,13 @@ package com.example.bookreview.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter @Setter
 public class CommentCreateDto {
     private Long reviewId;
+    @NotBlank
     private String text;
-
-    // геттеры и сеттеры
-    public Long getReviewId() { return reviewId; }
-    public void setReviewId(Long reviewId) { this.reviewId = reviewId; }
-
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
 }

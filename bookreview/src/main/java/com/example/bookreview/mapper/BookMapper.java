@@ -11,5 +11,4 @@ import java.util.List;
 public interface BookMapper {
     BookDto toDto(Book book);
     Book toEntity(BookCreateDto dto);
-    List<BookDto> toDtoList(List<Book> books);
 }

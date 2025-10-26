@@ -28,7 +28,6 @@ public class Review {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    // Используем List (не Set) но с @OrderBy для избежания bag проблем
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt ASC")
     private List<Comment> comments = new ArrayList<>();

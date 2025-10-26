@@ -22,7 +22,7 @@ public class CommentController {
     public String addComment(@RequestParam Long reviewId,
                              @RequestParam String text,
                              Principal principal) {
-        // Создаем DTO
+
         CommentCreateDto commentDto = new CommentCreateDto();
         commentDto.setReviewId(reviewId);
         commentDto.setText(text);
@@ -36,23 +36,18 @@ public class CommentController {
 
     @PostMapping("/comments/{id}/delete")
     public String deleteComment(@PathVariable Long id,
-                                Principal principal,
-                                HttpServletRequest request) {
+                                Principal principal) {
         try {
             String username = principal.getName();
 
-            // СНАЧАЛА получаем reviewId ДО удаления комментария
             Long reviewId = commentService.getReviewIdByCommentId(id);
             Long bookId = commentService.getBookIdByReviewId(reviewId);
 
-            // ПОТОМ удаляем комментарий
             commentService.deleteComment(id, username);
 
             return "redirect:/books/" + bookId + "#review-" + reviewId;
         } catch (RuntimeException e) {
-            // Логируем ошибку
             System.err.println("Error deleting comment: " + e.getMessage());
-            // Перенаправляем на главную страницу книг в случае ошибки
             return "redirect:/books?error=comment_not_found";
         }
     }
